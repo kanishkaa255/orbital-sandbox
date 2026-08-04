@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from .db import SessionLocal
@@ -25,3 +25,15 @@ def create_simulation(simulation: SimulationCreate, db: Session = Depends(get_db
     db.commit()
     db.refresh(new_sim)
     return new_sim
+
+@app.get("/simulations", response_model=list[SimulationOut])
+def list_simulations(db: Session = Depends(get_db)):
+    simulations = db.query(Simulation).all()
+    return simulations
+
+@app.get("/simulations/{simulation_id}", response_model=SimulationOut)
+def get_simulation(simulation_id: int, db: Session = Depends(get_db)):
+    simulation = db.query(Simulation).filter(Simulation.id == simulation_id).first()
+    if simulation is None:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+    return simulation

@@ -49,3 +49,4 @@ def test_energy_conservation():
 
     assert final_energy == pytest.approx(initial_energy, rel=1e-3)
     #Euler drift over 30 days: 1.6e-7 relative
+    #Verlet drift over 2 years: relative energy drift: -2.076236e-11 relative
