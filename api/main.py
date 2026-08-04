@@ -1,6 +1,8 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from physics.engine import Body, step
+
 from .db import SessionLocal
 from .models import Simulation
 from .schemas import SimulationCreate, SimulationOut
@@ -37,3 +39,40 @@ def get_simulation(simulation_id: int, db: Session = Depends(get_db)):
     if simulation is None:
         raise HTTPException(status_code=404, detail="Simulation not found")
     return simulation
+
+@app.post("/simulations/{simulation_id}/fork", response_model=SimulationOut)
+def fork_simulation(simulation_id: int, db: Session = Depends(get_db)):
+    original_sim = db.query(Simulation).filter(Simulation.id == simulation_id).first()
+    if original_sim is None:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+    
+    forked_sim = Simulation(name=f"{original_sim.name} (fork)", config=original_sim.config, forked_from_id=original_sim.id)
+    db.add(forked_sim)
+    db.commit()
+    db.refresh(forked_sim)
+    return forked_sim
+
+def body_to_dict(body):
+    return {
+        "mass": body.mass,
+        "x": body.x,
+        "y": body.y,
+        "vx": body.vx,
+        "vy": body.vy,
+    }
+
+def dict_to_body(d, name="body"):
+    return Body(name=name, mass=d["mass"], x=d["x"], y=d["y"], vx=d["vx"], vy=d["vy"])
+
+@app.post("/simulations/{simulation_id}/step", response_model=SimulationOut)
+def step_simulation(simulation_id: int, num_steps: int = 100, dt: float = 3600, db: Session = Depends(get_db)):
+    simulation = db.query(Simulation).filter(Simulation.id == simulation_id).first()
+    if simulation is None:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+    bodies = [dict_to_body(b, name=f"body_{i}") for i, b in enumerate(simulation.config["bodies"])]
+    for _ in range(num_steps):
+        step(bodies, dt)
+    simulation.config = {**simulation.config, "bodies": [body_to_dict(b) for b in bodies]}
+    db.add(simulation)
+    db.commit()
+    return simulation   
