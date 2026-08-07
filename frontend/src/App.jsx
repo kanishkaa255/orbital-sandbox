@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { step, computeScale } from './physics';
 import CreateSystemForm from './CreateSystemForm';
+import Gallery from './Gallery';
 
 function App() {
   const canvasRef = useRef(null);
@@ -47,6 +48,7 @@ function App() {
   return (
     <>
       <CreateSystemForm onSimulationCreated={setActiveBodies} />
+      <Gallery onSimulationLoaded={setActiveBodies} />
       <canvas ref={canvasRef} width={800} height={600} style={{ background: 'black' }} />
     </>
   );
