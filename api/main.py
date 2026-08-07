@@ -9,6 +9,15 @@ from .schemas import SimulationCreate, SimulationOut
 
 app = FastAPI()
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 def get_db():
     db = SessionLocal()
     try:
@@ -59,10 +68,12 @@ def body_to_dict(body):
         "y": body.y,
         "vx": body.vx,
         "vy": body.vy,
+        "radius": body.radius,
+        "color": body.color,
     }
 
 def dict_to_body(d, name="body"):
-    return Body(name=name, mass=d["mass"], x=d["x"], y=d["y"], vx=d["vx"], vy=d["vy"])
+    return Body(name=name, mass=d["mass"], x=d["x"], y=d["y"], vx=d["vx"], vy=d["vy"], radius=d.get("radius", 1.0), color=d.get("color", "white"))
 
 @app.post("/simulations/{simulation_id}/step", response_model=SimulationOut)
 def step_simulation(simulation_id: int, num_steps: int = 100, dt: float = 3600, db: Session = Depends(get_db)):
