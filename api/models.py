@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, JSON, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, JSON, DateTime, ForeignKey, Text
 from sqlalchemy.sql import func
 from .db import Base
 
@@ -10,3 +10,5 @@ class Simulation(Base):
     config = Column(JSON, nullable=False)
     created_at = Column(DateTime, server_default=func.now())
     forked_from_id = Column(Integer, ForeignKey("simulations.id"), nullable=True)
+    ai_narration = Column(Text, nullable=True)
+    ai_narration_status = Column(String, nullable=True) 
