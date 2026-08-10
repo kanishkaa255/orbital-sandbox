@@ -7,6 +7,13 @@ from .db import SessionLocal
 from .models import Simulation
 from .schemas import SimulationCreate, SimulationOut
 
+import redis
+from rq import Queue
+
+
+redis_conn = redis.from_url("redis://localhost:6379")
+queue = Queue(connection=redis_conn)
+
 app = FastAPI()
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -87,3 +94,16 @@ def step_simulation(simulation_id: int, num_steps: int = 100, dt: float = 3600, 
     db.add(simulation)
     db.commit()
     return simulation   
+
+@app.post("/simulations/{simulation_id}/predict")
+def predict_simulation(simulation_id: int, db: Session = Depends(get_db)):
+    simulation = db.query(Simulation).filter(Simulation.id == simulation_id).first()
+    if simulation is None:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+
+    simulation.ai_narration_status = "pending"
+    db.commit()
+
+    queue.enqueue("worker.tasks.run_prediction_job", simulation_id)
+
+    return {"status": "prediction started"}
