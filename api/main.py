@@ -1,4 +1,6 @@
-from fastapi import FastAPI, Depends, HTTPException
+import redis
+from fastapi import Depends, FastAPI, HTTPException
+from rq import Queue
 from sqlalchemy.orm import Session
 
 from physics.engine import Body, step
@@ -6,10 +8,6 @@ from physics.engine import Body, step
 from .db import SessionLocal
 from .models import Simulation
 from .schemas import SimulationCreate, SimulationOut
-
-import redis
-from rq import Queue
-
 
 redis_conn = redis.from_url("redis://localhost:6379")
 queue = Queue(connection=redis_conn)
@@ -26,6 +24,7 @@ app.add_middleware(
 )
 
 from rq import Retry
+
 
 def get_db():
     db = SessionLocal()

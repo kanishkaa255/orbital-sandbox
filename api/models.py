@@ -1,6 +1,8 @@
-from sqlalchemy import Column, Integer, String, JSON, DateTime, ForeignKey, Text
+from sqlalchemy import JSON, Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.sql import func
+
 from .db import Base
+
 
 class Simulation(Base):
     __tablename__ = "simulations"

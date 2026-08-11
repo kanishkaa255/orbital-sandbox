@@ -1,17 +1,18 @@
-import sys
 import os
+import sys
 
 from api.models import Simulation
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import math
-from dotenv import load_dotenv
+
 from anthropic import Anthropic
-
-from physics.engine import Body, step
-
+from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
+from physics.engine import Body, step
 
 DATABASE_URL = "postgresql://orbital_user:orbital_pass@localhost:5432/orbital_db"
 engine = create_engine(DATABASE_URL)
