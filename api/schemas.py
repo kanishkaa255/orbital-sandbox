@@ -1,6 +1,7 @@
-from pydantic import BaseModel, ConfigDict
-from typing import Optional
 from datetime import datetime
+
+from pydantic import BaseModel, ConfigDict
+
 
 class SimulationCreate(BaseModel):
     name: str
@@ -11,7 +12,7 @@ class SimulationOut(BaseModel):
     name: str
     config: dict
     created_at: datetime
-    forked_from_id: Optional[int] = None
+    forked_from_id: int | None = None
     model_config = ConfigDict(from_attributes=True)
-    ai_narration: Optional[str] = None
-    ai_narration_status: Optional[str] = None
+    ai_narration: str | None = None
+    ai_narration_status: str | None = None

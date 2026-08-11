@@ -1,5 +1,7 @@
 import pytest
-from .engine import Body, step, G
+
+from .engine import Body, G, step
+
 
 def test_momentum_conservation():
     sun = Body(name="sun", mass=1.989e30, x=0, y=0, vx=0, vy=0, radius=10)
