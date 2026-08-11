@@ -107,3 +107,14 @@ def predict_simulation(simulation_id: int, db: Session = Depends(get_db)):
     queue.enqueue("worker.tasks.run_prediction_job", simulation_id)
 
     return {"status": "prediction started"}
+
+@app.get("/simulations/{simulation_id}/prediction")
+def get_prediction(simulation_id: int, db: Session = Depends(get_db)):
+    simulation = db.query(Simulation).filter(Simulation.id == simulation_id).first()
+    if simulation is None:
+        raise HTTPException(status_code=404, detail="Simulation not found")
+
+    return {
+        "status": simulation.ai_narration_status,
+        "narration": simulation.ai_narration,
+    }
