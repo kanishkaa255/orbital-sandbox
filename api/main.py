@@ -25,6 +25,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from rq import Retry
+
 def get_db():
     db = SessionLocal()
     try:
@@ -104,7 +106,12 @@ def predict_simulation(simulation_id: int, db: Session = Depends(get_db)):
     simulation.ai_narration_status = "pending"
     db.commit()
 
-    queue.enqueue("worker.tasks.run_prediction_job", simulation_id)
+    queue.enqueue(
+    "worker.tasks.run_prediction_job",
+    simulation_id,
+    retry=Retry(max=3),
+    on_failure="worker.tasks.mark_prediction_failed",
+    )       
 
     return {"status": "prediction started"}
 

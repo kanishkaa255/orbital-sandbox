@@ -1,5 +1,7 @@
 import sys
 import os
+
+from api.models import Simulation
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 
 import math
@@ -77,7 +79,7 @@ def generate_narration(summary):
     return response.content[0].text
 
 def run_prediction_job(simulation_id):
-    from api.models import Simulation  # imported here to avoid circular import issues
+    from api.models import Simulation
 
     db = SessionLocal()
     try:
@@ -91,9 +93,16 @@ def run_prediction_job(simulation_id):
         sim.ai_narration = narration
         sim.ai_narration_status = "complete"
         db.commit()
-    except Exception as e:
-        sim.ai_narration_status = "failed"
-        db.commit()
-        raise
+    finally:
+        db.close()
+
+def mark_prediction_failed(job, connection, type, value, traceback):
+    simulation_id = job.args[0]
+    db = SessionLocal()
+    try:
+        sim = db.query(Simulation).filter(Simulation.id == simulation_id).first()
+        if sim:
+            sim.ai_narration_status = "failed"
+            db.commit()
     finally:
         db.close()
