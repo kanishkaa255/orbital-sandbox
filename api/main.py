@@ -127,6 +127,7 @@ def get_prediction(simulation_id: int, db: Session = Depends(get_db)):
 
 from pydantic import BaseModel
 
+
 class PredictPreviewRequest(BaseModel):
     bodies: list[dict]
 
