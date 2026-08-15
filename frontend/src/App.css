@@ -1,6 +1,6 @@
 .app-shell {
   display: grid;
-  grid-template-columns: 320px 1fr;
+  grid-template-columns: minmax(260px, 320px) 1fr;
   grid-template-rows: auto 1fr;
   height: 100vh;
 }
@@ -67,7 +67,7 @@ input, button {
   position: fixed;
   bottom: 0;
   right: 0;
-  width: 45vw;
+  width: min(45vw, 500px);
   height: 100vh;
   overflow: hidden;
   perspective: 400px;
