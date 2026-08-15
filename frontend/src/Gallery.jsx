@@ -15,7 +15,6 @@ function Gallery({ onSimulationLoaded }) {
 
   return (
     <div>
-      <h3>Saved Systems</h3>
       <ul>
         {simulations.map(sim => (
           <li key={sim.id}>

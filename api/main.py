@@ -124,3 +124,17 @@ def get_prediction(simulation_id: int, db: Session = Depends(get_db)):
         "status": simulation.ai_narration_status,
         "narration": simulation.ai_narration,
     }
+
+from pydantic import BaseModel
+
+
+class PredictPreviewRequest(BaseModel):
+    bodies: list[dict]
+
+@app.post("/predict-preview")
+def predict_preview(payload: PredictPreviewRequest):
+    from worker.tasks import analyze_simulation, generate_narration
+
+    summary = analyze_simulation({"bodies": payload.bodies})
+    narration = generate_narration(summary)
+    return {"narration": narration}
