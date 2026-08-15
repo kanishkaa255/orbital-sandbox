@@ -11,6 +11,10 @@ function App() {
   const [narration, setNarration] = useState('');
   const [showCrawl, setShowCrawl] = useState(false);
   const[analyzing, setAnalyzing] = useState(false);
+  const[formBodies, setFormBodies] = useState([
+    { name: '', mass: '', x: '', y: '', vx: '', vy: '', radius: '', color: ''}
+  ]);
+  const [formName, setFormName] = useState('');
 
   useEffect(() => {
   if (activeBodies.length === 0) return;
@@ -54,6 +58,22 @@ function App() {
   return () => cancelAnimationFrame(animationId);
 }, [activeBodies]);
 
+function handleLoadSimulation(sim) {
+  setActiveBodies(sim.config.bodies);
+  const formattedBodies = sim.config.bodies.map(b => ({
+    name: b.name || '',
+    mass: String(b.mass || ''),
+    x: String(b.x),
+    y: String(b.y),
+    vx: String(b.vx),
+    vy: String(b.vy),
+    radius: String(b.radius || ''),
+    color: b.color || '',
+  }));
+  setFormBodies(formattedBodies);
+  setFormName(sim.name + '(loaded)');
+}
+
   return (
   <div className="app-shell">
     <header className="app-header">
@@ -63,9 +83,12 @@ function App() {
       <div className="panel-section">
         <div className="panel-label">Bodies</div>
         <CreateSystemForm 
+          bodies={formBodies}
+          setBodies={setFormBodies}
+          systemName={formName}
+          setSystemName={setFormName}
           onSimulationCreated={setActiveBodies}
           onAnalysisStart={() => {
-            console.log('analysis started');
             setAnalyzing(true);
           }}
           onPredictionReady={(text) => { 
@@ -81,7 +104,7 @@ function App() {
       </div>
       <div className="panel-section">
         <div className="panel-label">Saved Systems</div>
-        <Gallery onSimulationLoaded={setActiveBodies} />
+        <Gallery onSimulationLoaded={handleLoadSimulation} />
       </div>
     </aside>
     <main className="canvas-area">

@@ -1,11 +1,6 @@
 import { useState } from 'react';
 
-function CreateSystemForm({ onSimulationCreated, onPredictionReady, onAnalysisStart }) {
-  const [bodies, setBodies] = useState([
-  { mass: '', x: '', y: '', vx: '', vy: '', radius: '', color: '' }
-]);
-
-const [systemName, setSystemName] = useState('');
+function CreateSystemForm({ bodies, setBodies, systemName, setSystemName, onSimulationCreated, onPredictionReady, onAnalysisStart }) {
 
 function updateBody(index, field, value) {
   const newBodies = [...bodies];
@@ -14,11 +9,13 @@ function updateBody(index, field, value) {
 }
 
 function addBody() {
-  setBodies([...bodies, { mass: '', x: '', y: '', vx: '', vy: '', radius: '', color: '' }]);
+  setBodies([...bodies, { name: '', mass: '', x: '', y: '', vx: '', vy: '', radius: '', color: '' }]);
 }
+
 async function handleRun(e) {
   e.preventDefault();
-  const parsedBodies = bodies.map(b => ({
+  const parsedBodies = bodies.map((b, i) => ({
+    name: b.name || `body_${i}`,
     mass: parseFloat(b.mass),
     x: parseFloat(b.x),
     y: parseFloat(b.y),
@@ -40,7 +37,8 @@ async function handleRun(e) {
 }
 
 async function handleSave() {
-  const parsedBodies = bodies.map(b => ({
+  const parsedBodies = bodies.map((b, i) => ({
+    name: b.name || `body_${i}`,
     mass: parseFloat(b.mass),
     x: parseFloat(b.x),
     y: parseFloat(b.y),
@@ -72,6 +70,7 @@ async function handleSave() {
     />
     {bodies.map((body, index) => (
       <div key={index} style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border)' }}>
+        <input type="text" value={body.name} onChange={(e) => updateBody(index, 'name', e.target.value)} placeholder="name (e.g. Earth)" />
         <input type="text" value={body.mass} onChange={(e) => updateBody(index, 'mass', e.target.value)} placeholder="mass (e.g. 5.97e24)" />
         <input type="text" value={body.x} onChange={(e) => updateBody(index, 'x', e.target.value)} placeholder="x (e.g. 1.5e11)" />
         <input type="text" value={body.y} onChange={(e) => updateBody(index, 'y', e.target.value)} placeholder="y (e.g. 0)" />
