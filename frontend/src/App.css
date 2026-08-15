@@ -111,3 +111,50 @@ input, button {
       opacity: 0;
     }
   }
+
+  .gallery-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .gallery-item {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.6rem 0.8rem;
+    margin-bottom: 0.6rem;
+    background: rgba(255,255,255, 0.02);
+
+    .gallery-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.3rem;
+    }
+
+    .gallery-item-name {
+      font-weight: 500;
+    }
+
+    .gallery-item-meta{
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+    }
+
+    .gallery-item button {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--accent-cyan);
+      padding: 0.23rem 0.6rem;
+      border-radius: 3px;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    .gallery-item button:hover {
+      background: var(--accent-cyan);
+      color: var(--bg);
+    }
+  }
