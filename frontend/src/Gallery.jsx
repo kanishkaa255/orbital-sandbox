@@ -14,17 +14,24 @@ function Gallery({ onSimulationLoaded }) {
   }
 
   return (
-    <div>
-      <ul>
-        {simulations.map(sim => (
-          <li key={sim.id}>
-            {sim.name} (id: {sim.id})
-            <button onClick={() => handleLoad(sim)}>Load</button>
+    <ul className = "gallery-list">
+      {simulations.map(sim => {
+        const bodyCount = sim.config.bodies.length;
+        const totalMass = sim.config.bodies.reduce((sum, b) => sum + b.mass, 0);
+        return(
+          <li key={sim.id} className="gallery-item">
+            <div className="gallery-item-header">
+              <span className="gallery-item-name">{sim.name}</span>
+              <button onClick={() => handleLoad(sim)}>Load</button>
+            </div>
+            <div className="gallery-item-details">
+              ID {sim.id}, {bodyCount} {bodyCount === 1 ? 'body' : 'bodies'}, Total Mass: {totalMass.toExponential(2)} kg
+              {sim.forked_from_id && 'forked from #' + sim.forked_from_id}
+            </div>
           </li>
-        ))}
-      </ul>
-    </div>
+        )
+      })}
+    </ul>
   );
 }
-
 export default Gallery;
