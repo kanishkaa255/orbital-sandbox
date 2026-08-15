@@ -108,7 +108,19 @@ function handleLoadSimulation(sim) {
       </div>
     </aside>
     <main className="canvas-area">
-      <canvas ref={canvasRef} width={800} height={600} style={{ background: 'var(--bg)', border: '1px solid var(--border)' }} />
+      <canvas 
+        ref={canvasRef} 
+        width={800} 
+        height={600} 
+        style={{ 
+          background: 'var(--bg)', 
+          border: '1px solid var(--border)',
+          maxWidth: '100%',
+          maxHeight: '100%',
+          width: 'auto',
+          height: 'auto',
+        }} 
+      />
     </main>
     {showCrawl && <Crawl text={narration} onFinished={() => setShowCrawl(false)} />}
   </div>
