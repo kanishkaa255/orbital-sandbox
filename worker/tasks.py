@@ -24,7 +24,7 @@ client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
 def analyze_simulation(config, num_steps=1000, dt=3600):
     bodies = [
-        Body(name=f"body_{i}", mass=b["mass"], x=b["x"], y=b["y"], vx=b["vx"], vy=b["vy"])
+        Body(name=b.get("name", f"body_{i}"), mass=b["mass"], x=b["x"], y=b["y"], vx=b["vx"], vy=b["vy"])
         for i, b in enumerate(config["bodies"])
     ]
 

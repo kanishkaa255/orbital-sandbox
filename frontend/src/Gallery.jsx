@@ -10,7 +10,7 @@ function Gallery({ onSimulationLoaded }) {
   }, []);
 
   function handleLoad(sim) {
-    onSimulationLoaded(sim.config.bodies);
+    onSimulationLoaded(sim);
   }
 
   return (
