@@ -158,3 +158,27 @@ input, button {
       color: var(--bg);
     }
   }
+
+  .chaos-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .chaos-header{
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .chaos-header h2 {
+    font-size: 1rem;
+    color: var(--text-dim);
+    font-weight: 500;
+  }
