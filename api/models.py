@@ -14,3 +14,4 @@ class Simulation(Base):
     forked_from_id = Column(Integer, ForeignKey("simulations.id"), nullable=True)
     ai_narration = Column(Text, nullable=True)
     ai_narration_status = Column(String, nullable=True) 
+    initial_config = Column(JSON, nullable=True)

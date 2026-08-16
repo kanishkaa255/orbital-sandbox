@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-function CreateSystemForm({ bodies, setBodies, systemName, setSystemName, onSimulationCreated, onPredictionReady, onAnalysisStart }) {
+function CreateSystemForm({ bodies, setBodies, systemName, setSystemName, onSimulationCreated, onPredictionReady, onAnalysisStart, onDuplicateFound }) {
 
 function updateBody(index, field, value) {
   const newBodies = [...bodies];
@@ -47,6 +47,26 @@ async function handleSave() {
     radius: parseFloat(b.radius),
     color: b.color,
   }));
+
+  const checkResponse = await fetch('http://127.0.0.1:8000/simulations/check-duplicate', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json'},
+    body: JSON.stringify({ bodies: parsedBodies }),
+  })
+  const checkData = await checkResponse.json();
+
+  console.log('duplicate check payload:', JSON.stringify({ bodies: parsedBodies }));
+  if(checkData.duplicate) {
+    const proceed = window.confirm(
+      `This system already exists as "${checkData.duplicate.name}" (ID ${checkData.duplicate.id}). Save anyway?`
+    );
+    if (!proceed){
+      const dupResponse = await fetch(`http://127.0.0.1:8000/simulations/${checkData.duplicate.id}`);
+      const dupData = await dupResponse.json()
+      onDuplicateFound?.(dupData);
+      return;
+    }
+  }
 
 
   await fetch('http://127.0.0.1:8000/simulations', {
