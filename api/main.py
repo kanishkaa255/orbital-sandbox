@@ -2,6 +2,7 @@ import redis
 from fastapi import Depends, FastAPI, HTTPException
 from rq import Queue
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 
 from physics.engine import Body, step
 
@@ -39,7 +40,7 @@ def health_check():
 
 @app.post("/simulations", response_model=SimulationOut)
 def create_simulation(simulation: SimulationCreate, db: Session = Depends(get_db)):
-    new_sim = Simulation(name=simulation.name, config=simulation.config)
+    new_sim = Simulation(name=simulation.name, config=simulation.config, initial_config = simulation.config,)
     db.add(new_sim)
     db.commit()
     db.refresh(new_sim)
@@ -57,13 +58,39 @@ def get_simulation(simulation_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Simulation not found")
     return simulation
 
+class DuplicateCheckRequest(BaseModel):
+    bodies: list[dict]
+
+def bodies_match(bodies_a, bodies_b):
+    if len(bodies_a) != len(bodies_b):
+        return False
+    def sort_key(body):
+        return(body.get("mass",0), body.get("x", 0), body.get("y", 0), body.get("vx",0), body.get("vy",0))
+
+    sorted_a = sorted(bodies_a, key=sort_key)
+    sorted_b = sorted(bodies_b, key=sort_key)
+
+    for a, b in zip(sorted_a, sorted_b):
+        for field in ["mass", "x", "y", "vx", "vy", "radius"]:
+            if a.get(field) != b.get(field):
+                return False
+    return True
+
+@app.post("/simulations/check-duplicate")
+def check_duplicate(payload: DuplicateCheckRequest, db: Session = Depends(get_db)):
+    all_sims = db.query(Simulation).all()
+    for sim in all_sims:
+        if sim.initial_config and bodies_match(payload.bodies, sim.initial_config.get("bodies", [])):
+            return {"duplicate": {"id": sim.id, "name": sim.name}}
+    return {"duplicate": None}
+
 @app.post("/simulations/{simulation_id}/fork", response_model=SimulationOut)
 def fork_simulation(simulation_id: int, db: Session = Depends(get_db)):
     original_sim = db.query(Simulation).filter(Simulation.id == simulation_id).first()
     if original_sim is None:
         raise HTTPException(status_code=404, detail="Simulation not found")
     
-    forked_sim = Simulation(name=f"{original_sim.name} (fork)", config=original_sim.config, forked_from_id=original_sim.id)
+    forked_sim = Simulation(name=f"{original_sim.name} (fork)", config=original_sim.config, initial_config = original_sim.initial_config, forked_from_id=original_sim.id)
     db.add(forked_sim)
     db.commit()
     db.refresh(forked_sim)
@@ -124,8 +151,6 @@ def get_prediction(simulation_id: int, db: Session = Depends(get_db)):
         "status": simulation.ai_narration_status,
         "narration": simulation.ai_narration,
     }
-
-from pydantic import BaseModel
 
 
 class PredictPreviewRequest(BaseModel):

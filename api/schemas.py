@@ -16,3 +16,4 @@ class SimulationOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     ai_narration: str | None = None
     ai_narration_status: str | None = None
+    initial_config: dict | None = None

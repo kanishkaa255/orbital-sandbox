@@ -96,6 +96,9 @@ function handleLoadSimulation(sim) {
             setNarration(text); 
             setShowCrawl(true); 
           }}
+          onDuplicateFound = {
+            handleLoadSimulation
+          }
         />
         {analyzing && <p style = {{color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>Analyzing system...</p>}
         {narration && !showCrawl && (
