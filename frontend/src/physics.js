@@ -69,3 +69,22 @@ export function computeScale(bodies, canvasWidth, canvasHeight) {
   const scaleY = (canvasHeight * padding) / (2 * maxCoord);
   return Math.min(scaleX, scaleY);
 }
+
+export function runChaosMap(baseBodies, numRuns, numSteps, dt, perturbation = 1e-6){
+    const runs = [];
+    for(let r=0; r< numRuns; r++) {
+        const bodies = baseBodies.map(b=> ({
+            ...b,
+            vx: b.vx * (1 + (Math.random() - 0.5) * perturbation),
+            vy: b.vy * (1 + (Math.random() - 0.5) * perturbation),
+        }));
+
+        const trajectory = [];
+        for (let s = 0; s< numSteps; s++){
+            step(bodies, dt);
+            trajectory.push(bodies.map(b =>({ x: b.x, y: b.y})));
+        }
+        runs.push(trajectory);
+    }
+    return runs;
+}

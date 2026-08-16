@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-function CreateSystemForm({ bodies, setBodies, systemName, setSystemName, onSimulationCreated, onPredictionReady, onAnalysisStart, onDuplicateFound }) {
+function CreateSystemForm({ bodies, setBodies, systemName, setSystemName, onSimulationCreated, onPredictionReady, onAnalysisStart, onDuplicateFound, narration, showCrawl, setShowCrawl }) {
 
 function updateBody(index, field, value) {
   const newBodies = [...bodies];
@@ -24,7 +24,7 @@ async function handleRun(e) {
     radius: parseFloat(b.radius),
     color: b.color,
   }));
-  onSimulationCreated(parsedBodies);
+  onSimulationCreated(structuredClone(parsedBodies));
   onAnalysisStart?.();
 
   const response = await fetch('http://127.0.0.1:8000/predict-preview', {
@@ -34,6 +34,7 @@ async function handleRun(e) {
   });
    const data = await response.json();
    onPredictionReady?.(data.narration);
+
 }
 
 async function handleSave() {
@@ -89,7 +90,7 @@ async function handleSave() {
       style={{ marginBottom: '1rem', width: '100%' }}
     />
     {bodies.map((body, index) => (
-      <div key={index} style={{ marginBottom: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--border)' }}>
+      <div key={index} style={{ marginBottom: '1rem'}}>
         <input type="text" value={body.name} onChange={(e) => updateBody(index, 'name', e.target.value)} placeholder="name (e.g. Earth)" />
         <input type="text" value={body.mass} onChange={(e) => updateBody(index, 'mass', e.target.value)} placeholder="mass (e.g. 5.97e24)" />
         <input type="text" value={body.x} onChange={(e) => updateBody(index, 'x', e.target.value)} placeholder="x (e.g. 1.5e11)" />
@@ -100,13 +101,19 @@ async function handleSave() {
         <input type="text" value={body.color} onChange={(e) => updateBody(index, 'color', e.target.value)} placeholder="color (e.g. blue)" />
       </div>
     ))}
-    <button type="button" onClick={addBody}>+ Add body</button>
-    <button type="submit">Run</button>
-    <button type="button" onClick={handleSave} style={{ marginLeft: '0.5rem' }}>Save to gallery</button>
-    <p style={{ fontSize: '1rem', color: 'var(--text-dim)', marginBottom: '0.75rem', lineHeight: 1.4 }}>
-        Values should be physically consistent (e.g. mass in kg, distance in meters) — 
-        unrealistic combinations may cause bodies to move very fast or fly off screen. 
+    <p style={{ fontSize: '0.95rem', color: 'var(--text-dim)', marginBottom: '1rem', lineHeight: 1.4, paddingBottom: '1rem', borderBottom: '1px solid var(--border)' }}>
+        Values should be physically consistent (e.g. mass in kg, distance in meters).
+        Unrealistic/unatural combinations may cause bodies to move very fast or fly off screen. 
     </p>
+
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1rem', marginBottom: '1rem', borderBottom: '1px solid var(--border)'}}>
+      <button type="button" onClick={addBody}>+ Add body</button>
+      <button type="submit">Run</button>
+      <button type="button" onClick={handleSave}>Save to gallery</button>
+      {narration && !showCrawl && (
+        <button onClick={() => setShowCrawl(true)} style ={ {marginBottom: '1rem'}}>Review summary</button>
+      )}
+    </div>
   </form>
 );
 }

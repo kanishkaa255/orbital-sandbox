@@ -4,6 +4,7 @@ import CreateSystemForm from './CreateSystemForm';
 import Gallery from './Gallery';
 import './App.css';
 import Crawl from './Crawl';
+import ChaosMap from './ChaosMap';
 
 function App() {
   const canvasRef = useRef(null);
@@ -15,6 +16,7 @@ function App() {
     { name: '', mass: '', x: '', y: '', vx: '', vy: '', radius: '', color: ''}
   ]);
   const [formName, setFormName] = useState('');
+  const[showChaosMap, setShowChaosMap] = useState(false);
 
   useEffect(() => {
   if (activeBodies.length === 0) return;
@@ -60,7 +62,8 @@ function App() {
 
 function handleLoadSimulation(sim) {
   setActiveBodies(sim.config.bodies);
-  const formattedBodies = sim.config.bodies.map(b => ({
+  const source = sim.initial_config?.bodies || sim.config.bodies;
+  const formattedBodies = source.map(b => ({
     name: b.name || '',
     mass: String(b.mass || ''),
     x: String(b.x),
@@ -99,11 +102,18 @@ function handleLoadSimulation(sim) {
           onDuplicateFound = {
             handleLoadSimulation
           }
+            narration={narration}
+            showCrawl={showCrawl}
+            setShowCrawl={setShowCrawl}
         />
         {analyzing && <p style = {{color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>Analyzing system...</p>}
-        {narration && !showCrawl && (
-          <button onClick={() => setShowCrawl(true)}> Review summary </button>
-        )}
+        <div style={{marginBottom:'1rem', marginTop: '1rem', borderBottom: '1px solid var(--border)'}}>
+          <button onClick={() => setShowChaosMap(true)} style ={{width: '100%', marginBottom: '1rem', background: '#C837E8',  color: '#ffffff', border: '1px solid #C837E8', 
+            boxShadow: '0 0 8px #C837E8, 0 0 16px rgba(200, 55, 232, 0.5)', fontWeight: 600, }}>Chaos Map</button>
+        </div>
+        <p style={{ fontSize: '0.95rem', color: 'var(--text-dim)', marginTop: '1rem', paddingBottom: '1rem', lineHeight: 1.4, borderBottom: '1px solid var(--border)' }}>
+            Chaos Map runs 25 nearly-identical copies of this system with tiny random variations, showing how small differences can lead to wildly different outcomes, visually demonstrating chaos theory!
+        </p>
       </div>
       <div className="panel-section">
         <div className="panel-label">Saved Systems</div>
@@ -126,6 +136,16 @@ function handleLoadSimulation(sim) {
       />
     </main>
     {showCrawl && <Crawl text={narration} onFinished={() => setShowCrawl(false)} />}
+    {showChaosMap && <ChaosMap baseBodies={formBodies.map((b, i) => ({
+      name: b.name || `body_${i}`,
+      mass: parseFloat(b.mass),
+      x: parseFloat(b.x),
+      y: parseFloat(b.y),
+      vx: parseFloat(b.vx),
+      vy: parseFloat(b.vy),
+      radius: parseFloat(b.radius),
+      color: b.color,
+    }))} onClose={() => setShowChaosMap(false)} />}
   </div>
   );
 }
