@@ -1,8 +1,8 @@
 import redis
 from fastapi import Depends, FastAPI, HTTPException
+from pydantic import BaseModel
 from rq import Queue
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
 
 from physics.engine import Body, step
 
