@@ -5,6 +5,7 @@ function ChaosMap({ baseBodies, onClose }){
     const canvasRef = useRef(null);
 
     useEffect(() => {
+        console.log('ChaosMap useEffect fired, baseBodies:', baseBodies);
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         ctx.fillStyle = 'rgb(11, 14, 20)';
