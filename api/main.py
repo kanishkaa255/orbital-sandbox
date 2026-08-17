@@ -10,7 +10,8 @@ from .db import SessionLocal
 from .models import Simulation
 from .schemas import SimulationCreate, SimulationOut
 
-redis_conn = redis.from_url("redis://localhost:6379")
+import os
+redis_conn = redis.from_url(os.environ.get("REDIS_URL", "redis://localhost:6379"))
 queue = Queue(connection=redis_conn)
 
 app = FastAPI()
