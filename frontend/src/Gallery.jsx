@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
+import { API_URL } from './config';
 
 function Gallery({ onSimulationLoaded }) {
   const [simulations, setSimulations] = useState([]);
 
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/simulations')
+    fetch(`${API_URL}/simulations`)
       .then(res => res.json())
       .then(data => setSimulations(data));
   }, []);

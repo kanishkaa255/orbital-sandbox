@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { API_URL } from './config';
 
 function CreateSystemForm({ bodies, setBodies, systemName, setSystemName, onSimulationCreated, onPredictionReady, onAnalysisStart, onDuplicateFound, narration, showCrawl, setShowCrawl }) {
 
@@ -27,7 +28,7 @@ async function handleRun(e) {
   onSimulationCreated(structuredClone(parsedBodies));
   onAnalysisStart?.();
 
-  const response = await fetch('http://127.0.0.1:8000/predict-preview', {
+  const response = await fetch(`${API_URL}/predict-preview`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ bodies: parsedBodies }),
@@ -49,7 +50,7 @@ async function handleSave() {
     color: b.color,
   }));
 
-  const checkResponse = await fetch('http://127.0.0.1:8000/simulations/check-duplicate', {
+  const checkResponse = await fetch(`${API_URL}/simulations/check-duplicate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json'},
     body: JSON.stringify({ bodies: parsedBodies }),
@@ -62,7 +63,7 @@ async function handleSave() {
       `This system already exists as "${checkData.duplicate.name}" (ID ${checkData.duplicate.id}). Save anyway?`
     );
     if (!proceed){
-      const dupResponse = await fetch(`http://127.0.0.1:8000/simulations/${checkData.duplicate.id}`);
+      const dupResponse = await fetch(`${API_URL}/simulations/${checkData.duplicate.id}`);
       const dupData = await dupResponse.json()
       onDuplicateFound?.(dupData);
       return;
@@ -70,7 +71,7 @@ async function handleSave() {
   }
 
 
-  await fetch('http://127.0.0.1:8000/simulations', {
+  await fetch(`${API_URL}/simulations`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
