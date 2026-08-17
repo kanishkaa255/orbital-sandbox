@@ -45,40 +45,53 @@ Worker (worker/)
 
 ## Running Locally
 
-Requires Docker, Docker Compose, Node.js, and an Anthropic API key.
+There are two ways to run the workspace locally: **Method A (Docker Only)** or **Method B (Hybrid Developer Setup)**. Method B runs the execution layers natively on your machine, enabling fast code updates, hot-reloading, and compatibility with Windows environments.
 
-1. **Clone the repository and set up environment variables:**
+### Method A: Full Docker Mode
+This spins up the entire stack inside container network namespaces.
+```bash
+export ANTHROPIC_API_KEY=your-key-here
+docker compose up --build
+```
+*Note: Run `alembic upgrade head` to initialize tables, and launch the frontend via `npm run dev` in the `/frontend` directory.*
+
+### Method B: Hybrid Developer Setup (Hot-Reloading)
+This runs persistent storage (`db`, `redis`) inside light Docker slots while spinning up your development servers directly in independent terminal instances for instant debugging logs.
+
+1. **Spin up your storage infrastructure:**
    ```bash
-   git clone https://github.com
-   cd orbital-sandbox
-   
-   # Provide your Anthropic credentials for background job processing
-   export ANTHROPIC_API_KEY=your-actual-api-key-here
+   docker compose up db redis -d
    ```
 
-2. **Launch all background and network containers:**
+2. **Initialize database schemas:**
    ```bash
-   docker compose up --build
-   ```
-   This orchestrates:
-   - `api` — FastAPI application on `http://localhost:8000` (`/health` to confirm state)
-   - `db` — Postgres storage service on standard port `5432`
-   - `redis` — Message broker and job queue manager on port `6379`
-   - `worker` — RQ execution runner consuming prediction jobs
-
-3. **Run database migrations:**
-   ```bash
-   # Run in an independent terminal instance to initialize tables
+   # Make sure you are in the root directory
    alembic upgrade head
    ```
 
-4. **Initialize and boot the frontend environment:**
+3. **Launch the FastAPI application (API Layer):**
+   ```bash
+   # From the root directory
+   export ANTHROPIC_API_KEY=your-key-here
+   uvicorn api.main:app --reload
+   ```
+   *The API boots on `http://localhost:8000` with instant live code reloading.*
+
+4. **Launch the Redis Queue background task worker:**
+   ```bash
+   # From the root directory
+   rq worker --worker-class rq.worker.SimpleWorker --url redis://localhost:6379
+   ```
+   *Note: The `--worker-class rq.worker.SimpleWorker` flag is explicitly required to run job tasks sequentially within the active thread process. This avoids Unix fork errors, allowing the background queue to operate flawlessly across Windows and macOS architectures.*
+
+5. **Start the React + Vite frontend dashboard:**
    ```bash
    cd frontend
    npm install
    npm run dev
    ```
-   The client application opens on Vite's default port (`http://localhost:5173`) and binds directly to the core application route defined in `frontend/src/config.js`.
+   *The interface loads directly on Vite's default port `http://localhost:5173`.*
+
 
 ### Running Tests
 ```bash
