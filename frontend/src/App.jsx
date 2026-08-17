@@ -5,6 +5,7 @@ import Gallery from './Gallery';
 import './App.css';
 import Crawl from './Crawl';
 import ChaosMap from './ChaosMap';
+import { API_URL } from './config';
 
 function App() {
   const canvasRef = useRef(null);
