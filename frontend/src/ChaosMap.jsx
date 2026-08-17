@@ -7,6 +7,8 @@ function ChaosMap({ baseBodies, onClose }){
     useEffect(() => {
         console.log('ChaosMap useEffect fired, baseBodies:', baseBodies);
         const canvas = canvasRef.current;
+        console.log('canvas element:', canvas);
+        console.log('is canvas in document?', document.contains(canvas));
         const ctx = canvas.getContext('2d');
         ctx.fillStyle = 'red';
         ctx.fillRect(50, 50, 200, 200);
