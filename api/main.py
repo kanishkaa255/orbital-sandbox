@@ -1,3 +1,5 @@
+import os
+
 import redis
 from fastapi import Depends, FastAPI, HTTPException
 from pydantic import BaseModel
@@ -10,7 +12,6 @@ from .db import SessionLocal
 from .models import Simulation
 from .schemas import SimulationCreate, SimulationOut
 
-import os
 redis_conn = redis.from_url(os.environ.get("REDIS_URL", "redis://localhost:6379"))
 queue = Queue(connection=redis_conn)
 
