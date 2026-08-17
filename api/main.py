@@ -68,14 +68,21 @@ def bodies_match(bodies_a, bodies_b):
     if len(bodies_a) != len(bodies_b):
         return False
     def sort_key(body):
-        return(body.get("mass",0), body.get("x", 0), body.get("y", 0), body.get("vx",0), body.get("vy",0))
+
+        return(
+            body.get("mass",0), 
+            body.get("x", 0), 
+            body.get("y", 0), 
+            body.get("vx",0), 
+            body.get("vy",0)
+        )
 
     sorted_a = sorted(bodies_a, key=sort_key)
     sorted_b = sorted(bodies_b, key=sort_key)
 
     for a, b in zip(sorted_a, sorted_b):
         for field in ["mass", "x", "y", "vx", "vy", "radius"]:
-            if a.get(field) != b.get(field):
+            if float(a.get(field)) != float(b.get(field)):
                 return False
     return True
 
