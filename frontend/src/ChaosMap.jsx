@@ -8,6 +8,9 @@ function ChaosMap({ baseBodies, onClose }){
         console.log('ChaosMap useEffect fired, baseBodies:', baseBodies);
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
+        ctx.fillStyle = 'red';
+        ctx.fillRect(50, 50, 200, 200);
+        console.log('red square drawn');
         ctx.fillStyle = 'rgb(11, 14, 20)';
         ctx.fillRect(0,0, canvas.width, canvas.height);
 
