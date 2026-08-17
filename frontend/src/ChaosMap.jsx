@@ -12,14 +12,17 @@ function ChaosMap({ baseBodies, onClose }){
         ctx.fillRect(0,0, canvas.width, canvas.height);
 
         const runs = runChaosMap(structuredClone(baseBodies), 25, 15000, 3600, 1e-1);
+         console.log('runs computed:', runs.length);;
 
         const centerX = canvas.width/2;
         const centerY = canvas.height/2;
         const allPositions = runs.flat().flatMap(step => step.map(b => Math.max(Math.abs(b.x), Math.abs(b.y))));
         const maxCoord = allPositions.reduce((max, val) => Math.max(max,val), 1);
+        console.log('maxCoord:', maxCoord);
         const scaleX = (canvas.width * 0.7) / (2 * maxCoord);
         const scaleY = (canvas.height * 0.7) / (2 * maxCoord);
         const SCALE = Math.min(scaleX, scaleY);
+        console.log('SCALE:', SCALE);
 
         const colors = ['#7DD3E8', '#E8A05C', '#E86A6A', '#8AE86A', '#C87DE8'];
 
@@ -37,6 +40,7 @@ function ChaosMap({ baseBodies, onClose }){
             });
             ctx.stroke();
         });
+        console.log('drawing complete');
     }, [baseBodies]);
     
 
