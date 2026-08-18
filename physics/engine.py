@@ -19,10 +19,11 @@ def compute_acceleration(body: Body, other: Body):
     dx = other.x - body.x
     dy = other.y - body.y
     r_squared = dx**2 + dy**2
-    r = r_squared ** 0.5
+    EPSILON_SQ = 5e9**2 
+    r = (r_squared + EPSILON_SQ) ** 0.5 
 
     # force magnitude
-    f = G * body.mass * other.mass / r_squared
+    f = G * body.mass * other.mass / (r_squared + EPSILON_SQ)
 
     # break force into x and y components
     fx = f * (dx / r)

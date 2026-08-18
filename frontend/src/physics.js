@@ -5,9 +5,10 @@ function computeAcceleration(body, other) {
     const dy = other.y - body.y;
     
     const r_squared = dx**2 + dy**2;
-    const r = Math.sqrt(r_squared);
+    const EPSILON_SQ = Math.max(1e9 * 1e9, (body.radius || 0) ** 2); 
+    const r = Math.sqrt(r_squared + EPSILON_SQ);
 
-    const f = G * body.mass * other.mass / r_squared;
+    const f = (G * body.mass * other.mass) / (r_squared + EPSILON_SQ); 
 
     const fx = f * (dx / r);
     const fy = f * (dy / r);
