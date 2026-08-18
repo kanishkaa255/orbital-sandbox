@@ -2,7 +2,7 @@
 
 A 2D N-body gravity simulator in the browser. Build custom planetary systems, watch them evolve under Newtonian gravity in real time, save/load configurations through a global sidebar gallery, get an automated AI narration of how a system behaves, and visualize chaos theory by running dozens of nearly-identical copies of a system side-by-side.
 
-**Live demo:** [orbital-sandbox-eta.vercel.app](https://vercel.app)
+**Live demo:** [orbital-sandbox-eta.vercel.app](https://orbital-sandbox-eta.vercel.app)
 
 ## What it Does
 
@@ -11,7 +11,7 @@ A 2D N-body gravity simulator in the browser. Build custom planetary systems, wa
 - **Gallery Architecture:** Save custom systems to a global sidebar gallery and load any saved configuration directly back into the live interactive editor for modifications or replication.
 - **Duplicate Detection:** The application automatically runs coordinate checking and attribute verification checks before database insertion to prevent duplicate entries from flooding the layout.
 - **AI Narration:** Sends high-fidelity simulated trajectory data arrays (not just the starting states) to Claude, which synthesizes a plain-English structural description of how the bodies behave over time.
-- **Chaos Map Visualizations:** Generates 25 parallel simulation tracks of the active layout with a minute random velocity variance (\(\pm 0.0001\%\)). The engine calculates each track forward and superimposes all 25 paths on a translucent overlay using advanced alpha-blending—creating a stark, immediate visual demonstration of a chaotic strange attractor and sensitive dependence on initial conditions. Runs entirely in-browser.
+- **Chaos Map Visualizations:** Generates 25 parallel simulation tracks of the active layout with a minute random velocity variance (\(\pm 0.15\%\)). The engine calculates each track forward and superimposes all 25 paths on a translucent overlay using advanced alpha-blending—creating a stark, immediate visual demonstration of a chaotic strange attractor and sensitive dependence on initial conditions. Runs entirely in-browser. Note worth mentioning: (\(\pm 0.15\%\)) is exaggerated well beyond realistic chaos-theory scale for visual clarity in quick demos. Really, any sensitive dependence in this system emerges from pertubations many orders of magnitude
 
 ## Physics Implementation
 
@@ -45,40 +45,63 @@ Worker (worker/)
 
 ## Running Locally
 
-Requires Docker, Docker Compose, Node.js, and an Anthropic API key.
+There are two ways to run the workspace locally: **Method A (Docker Only)** or **Method B (Hybrid Developer Setup)**. Method B runs the execution layers natively on your machine, enabling fast code updates, hot-reloading, and compatibility with Windows environments.
 
-1. **Clone the repository and set up environment variables:**
+First, pursuing either path, clone the repository and set up environment variables:
+```bash
+git clone https://github.com/kanishkaa255/orbital-sandbox.git
+cd orbital-sandbox
+```
+Create a `.env` file in the project root with your Anthropic credentials:
+```bash
+ANTHROPIC_API_KEY=your-actual-api-key-here
+```
+
+### Method A: Full Docker Mode
+This spins up the entire stack inside container network namespaces.
+```bash
+export ANTHROPIC_API_KEY=your-key-here
+docker compose up --build
+```
+*Note: Run `alembic upgrade head` to initialize tables, and launch the frontend via `npm run dev` in the `/frontend` directory.*
+
+### Method B: Hybrid Developer Setup (Hot-Reloading)
+This runs persistent storage (`db`, `redis`) inside light Docker slots while spinning up your development servers directly in independent terminal instances for instant debugging logs.
+
+1. **Spin up your storage infrastructure:**
    ```bash
-   git clone https://github.com
-   cd orbital-sandbox
-   
-   # Provide your Anthropic credentials for background job processing
-   export ANTHROPIC_API_KEY=your-actual-api-key-here
+   docker compose up db redis -d
    ```
 
-2. **Launch all background and network containers:**
+2. **Initialize database schemas:**
    ```bash
-   docker compose up --build
-   ```
-   This orchestrates:
-   - `api` — FastAPI application on `http://localhost:8000` (`/health` to confirm state)
-   - `db` — Postgres storage service on standard port `5432`
-   - `redis` — Message broker and job queue manager on port `6379`
-   - `worker` — RQ execution runner consuming prediction jobs
-
-3. **Run database migrations:**
-   ```bash
-   # Run in an independent terminal instance to initialize tables
+   # Make sure you are in the root directory
    alembic upgrade head
    ```
 
-4. **Initialize and boot the frontend environment:**
+3. **Launch the FastAPI application (API Layer):**
+   ```bash
+   # From the root directory
+   export ANTHROPIC_API_KEY=your-key-here
+   uvicorn api.main:app --reload
+   ```
+   *The API boots on `http://localhost:8000` with instant live code reloading.*
+
+4. **Launch the Redis Queue background task worker:**
+   ```bash
+   # From the root directory
+   rq worker --worker-class rq.worker.SimpleWorker --url redis://localhost:6379
+   ```
+   *Note: The `--worker-class rq.worker.SimpleWorker` flag is explicitly required to run job tasks sequentially within the active thread process. This avoids Unix fork errors, allowing the background queue to operate flawlessly across Windows and macOS architectures.*
+
+5. **Start the React + Vite frontend dashboard:**
    ```bash
    cd frontend
    npm install
    npm run dev
    ```
-   The client application opens on Vite's default port (`http://localhost:5173`) and binds directly to the core application route defined in `frontend/src/config.js`.
+   *The interface loads directly on Vite's default port `http://localhost:5173`.*
+
 
 ### Running Tests
 ```bash
@@ -96,7 +119,8 @@ No active authentication boundaries or user profiles (saves are globally public 
 
 ## Deploy Status
 
-The application’s core backend service network routes locally via Docker Compose orchestration and is deployed globally in production via **Railway**. The client interface dashboard is continuously built and hosted live on **Vercel** with integrated cross-origin wildcard policies. Scaling out the individual container tiers into a distributed, infrastructure-managed Kubernetes architecture remains the primary structural stretch goal.
+The application’s core backend services (API, Postgres, Redis, worker) run locally via Docker Compose orchestration and are deployed in production on Railway. The client interface is continuously built and hosted live on Vercel with CORS configured for the production origin. 
+Deploying surfaced real cross-service networking challenges: navigating internal-vs-public Postgres/Redis connection strings across Railway projects, and running production database migrations via the Railway CLI against a live environment. Scaling the individual service tiers into a distributed, infrastructure-managed Kubernetes architecture remains the primary structural stretch goal.
 
 ## Retro
 
