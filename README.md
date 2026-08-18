@@ -2,7 +2,7 @@
 
 A 2D N-body gravity simulator in the browser. Build custom planetary systems, watch them evolve under Newtonian gravity in real time, save/load configurations through a global sidebar gallery, get an automated AI narration of how a system behaves, and visualize chaos theory by running dozens of nearly-identical copies of a system side-by-side.
 
-**Live demo:** [orbital-sandbox-eta.vercel.app](https://vercel.app)
+**Live demo:** [orbital-sandbox-eta.vercel.app](https://orbital-sandbox-eta.vercel.app)
 
 ## What it Does
 
@@ -11,7 +11,7 @@ A 2D N-body gravity simulator in the browser. Build custom planetary systems, wa
 - **Gallery Architecture:** Save custom systems to a global sidebar gallery and load any saved configuration directly back into the live interactive editor for modifications or replication.
 - **Duplicate Detection:** The application automatically runs coordinate checking and attribute verification checks before database insertion to prevent duplicate entries from flooding the layout.
 - **AI Narration:** Sends high-fidelity simulated trajectory data arrays (not just the starting states) to Claude, which synthesizes a plain-English structural description of how the bodies behave over time.
-- **Chaos Map Visualizations:** Generates 25 parallel simulation tracks of the active layout with a minute random velocity variance (\(\pm 0.0001\%\)). The engine calculates each track forward and superimposes all 25 paths on a translucent overlay using advanced alpha-blending—creating a stark, immediate visual demonstration of a chaotic strange attractor and sensitive dependence on initial conditions. Runs entirely in-browser.
+- **Chaos Map Visualizations:** Generates 25 parallel simulation tracks of the active layout with a minute random velocity variance (\(\pm 0.15\%\)). The engine calculates each track forward and superimposes all 25 paths on a translucent overlay using advanced alpha-blending—creating a stark, immediate visual demonstration of a chaotic strange attractor and sensitive dependence on initial conditions. Runs entirely in-browser. Note worth mentioning: (\(\pm 0.15\%\)) is exaggerated well beyond realistic chaos-theory scale for visual clarity in quick demos. Really, any sensitive dependence in this system emerges from pertubations many orders of magnitude
 
 ## Physics Implementation
 
@@ -46,6 +46,16 @@ Worker (worker/)
 ## Running Locally
 
 There are two ways to run the workspace locally: **Method A (Docker Only)** or **Method B (Hybrid Developer Setup)**. Method B runs the execution layers natively on your machine, enabling fast code updates, hot-reloading, and compatibility with Windows environments.
+
+First, pursuing either path, clone the repository and set up environment variables:
+```bash
+git clone https://github.com/kanishkaa255/orbital-sandbox.git
+cd orbital-sandbox
+```
+Create a `.env` file in the project root with your Anthropic credentials:
+```bash
+ANTHROPIC_API_KEY=your-actual-api-key-here
+```
 
 ### Method A: Full Docker Mode
 This spins up the entire stack inside container network namespaces.
@@ -109,7 +119,8 @@ No active authentication boundaries or user profiles (saves are globally public 
 
 ## Deploy Status
 
-The application’s core backend service network routes locally via Docker Compose orchestration and is deployed globally in production via **Railway**. The client interface dashboard is continuously built and hosted live on **Vercel** with integrated cross-origin wildcard policies. Scaling out the individual container tiers into a distributed, infrastructure-managed Kubernetes architecture remains the primary structural stretch goal.
+The application’s core backend services (API, Postgres, Redis, worker) run locally via Docker Compose orchestration and are deployed in production on Railway. The client interface is continuously built and hosted live on Vercel with CORS configured for the production origin. 
+Deploying surfaced real cross-service networking challenges: navigating internal-vs-public Postgres/Redis connection strings across Railway projects, and running production database migrations via the Railway CLI against a live environment. Scaling the individual service tiers into a distributed, infrastructure-managed Kubernetes architecture remains the primary structural stretch goal.
 
 ## Retro
 
