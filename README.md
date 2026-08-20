@@ -11,16 +11,16 @@ A 2D N-body gravity simulator in the browser. Build custom planetary systems, wa
 - **Gallery Architecture:** Save custom systems to a global sidebar gallery and load any saved configuration directly back into the live interactive editor for modifications or replication.
 - **Duplicate Detection:** The application automatically runs coordinate checking and attribute verification checks before database insertion to prevent duplicate entries from flooding the layout.
 - **AI Narration:** Runs the simulation server-side, then builds a per-body summary, initial vs. final distance from the system's center of mass, expressed as a growth ratio, and sends that summary to Claude, which synthesizes a plain-English description of how the system behaved.
-- **Chaos Map Visualizations:** Generates 25 parallel simulation tracks of the active layout with a minute random velocity variance (\(\pm 0.15\%\)). The engine calculates each track forward and superimposes all 25 paths on a translucent overlay using advanced alpha-blending—creating a stark, immediate visual demonstration of a chaotic strange attractor and sensitive dependence on initial conditions. Runs entirely in-browser. Note worth mentioning: (\(\pm 0.15\%\)) is exaggerated well beyond realistic chaos-theory scale for visual clarity in quick demos. Really, any sensitive dependence in this system emerges from pertubations many orders of magnitude
+- **Chaos Map Visualizations:** Generates 25 parallel simulation tracks of the active layout with a minute random velocity variance (\(\pm 0.15\%\)). The engine calculates each track forward and superimposes all 25 paths on a translucent overlay using advanced alpha-blending—creating a stark, immediate visual demonstration of a chaotic divergenc and sensitive dependence on initial conditions. Runs entirely in-browser. Note worth mentioning: (\(\pm 0.15\%\)) is exaggerated well beyond realistic chaos-theory scale for visual clarity in quick demos. Really, any sensitive dependence in this system emerges from pertubations many orders of magnitude
 
 ## Physics Implementation
 
 - **Newton's Law of Gravitation:** \(O(n^2)\) pairwise force computations where every body attracts every other body across the field.
 - **Velocity Verlet Integration:** The physics engine uses a high-fidelity Velocity Verlet formulation to optimize mathematical orbital stability and ensure strong energy conservation profiles (verified via integration checks in `physics/test_engine.py`).
-- **Measured Energy Drift (Standard 2-Body Sun-Earth System):**
+- **Measured Energy Drift (Standard 2-Body Sun-Earth System, measured manually, not in CI):**
   - **Euler** (30 simulated days): Relative energy drift \(\approx 1.6 \times 10^{-7}\)
-  - **Verlet** (2 simulated years): Relative energy drift \(\approx -2.08 \times 10^{-11}\)
-- **Automated Verification:** Conservation of momentum and energy laws are strictly asserted via custom testing suites in CI on every single pull request to guarantee physics parity.
+  - **Verlet** (2 simulated years): Relative energy drift \(\approx -2.076 \times 10^{-11}\)
+- **Automated Verification:** `pytest` (`physics/test_engine.py`) checks momentum and energy conservation on every pull request, with a 0.1% relative tolerance on energy and a generous absolute tolerance on momentum which is sufficient to catch gross physics errors, not to guarantee tight cross-engine (JS/Python) parity, which isn't currently tested.
 - **The Dual-Engine Design:** To maintain 60fps animations without flooding backend server pipelines, the engine uses two identical implementations: `physics/engine.py` (Python, leveraged by the API for server-side verification and queued prediction operations) and `frontend/src/physics.js` (JavaScript, powering real-time canvas rendering and Chaos Maps).
 
 ## Stack
@@ -130,5 +130,5 @@ Engineering the **Chaos Map overlay** was the most rewarding component of this p
 ### Architectural Tradeoffs & Challenges
 The defining architectural challenge was managing the **Dual-Engine Architecture**. Replicating the exact physics calculation loop across both Python (backend worker validation) and JavaScript (frontend animations) was a conscious sacrifice made to ensure responsive client interactions without constantly hitting server networks. The cost of this choice is an engine maintenance sync constraint: updates to the mathematical calculations or collision rules must be thoroughly ported to both source files simultaneously to ensure that real-time canvas paths do not drift from server-side prediction data.
 
-If building this system again from scratch, I would write the foundational physics core a single time using Rust or C, compiling the codebase down into a centralized WebAssembly (WASM) binary package. This would provide high-performance, native-speed processing cycles within the frontend canvas while permitting the exact same calculation package to be imported directly into the Python backend API,eliminating parity drift concerns entirely while securing a completely unified codebase.
+If building this system again from scratch, I would write the foundational physics core a single time using Rust or C, compiling the codebase down into a centralized WebAssembly (WASM) binary package. This would provide high-performance, native-speed processing cycles within the frontend canvas while permitting the exact same calculation package to be imported directly into the Python backend API, eliminating parity drift concerns entirely while securing a completely unified codebase.
 

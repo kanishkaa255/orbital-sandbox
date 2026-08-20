@@ -13,8 +13,25 @@ function addBody() {
   setBodies([...bodies, { name: '', mass: '', x: '', y: '', vx: '', vy: '', radius: '', color: '' }]);
 }
 
+function validateBodies(bodies) {
+  const errors = [];
+  bodies.forEach((b, i) => {
+    ['mass', 'x', 'y', 'vx', 'vy', 'radius'].forEach((field) => {
+      if (b[field] === '' || isNaN(parseFloat(b[field]))) {
+        errors.push(`Body ${i + 1} (${b.name || 'unnamed'}): "${field}" must be a number`);
+      }
+    });
+  });
+  return errors;
+}
+
 async function handleRun(e) {
   e.preventDefault();
+  const errors = validateBodies(bodies);
+  if (errors.length > 0) {
+    alert('Please fix the following:\n' + errors.join('\n'));
+    return;
+  }
   const parsedBodies = bodies.map((b, i) => ({
     name: b.name || `body_${i}`,
     mass: parseFloat(b.mass),
@@ -28,17 +45,29 @@ async function handleRun(e) {
   onSimulationCreated(structuredClone(parsedBodies));
   onAnalysisStart?.();
 
-  const response = await fetch(`${API_URL}/predict-preview`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ bodies: parsedBodies }),
-  });
-   const data = await response.json();
-   onPredictionReady?.(data.narration);
-
+  try {
+    const response = await fetch(`${API_URL}/predict-preview`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ bodies: parsedBodies }),
+    });
+    if (!response.ok) {
+      throw new Error(`Prediction request failed: ${response.status}`);
+    }
+    const data = await response.json();
+    onPredictionReady?.(data.narration);
+  } catch (err) {
+    console.error('handleRun failed:', err);
+    onPredictionReady?.('Something went wrong generating the narration. Please try again.');
+  }
 }
 
 async function handleSave() {
+  const errors = validateBodies(bodies);
+  if (errors.length > 0) {
+    alert('Please fix the following:\n' + errors.join('\n'));
+    return;
+  }
   const parsedBodies = bodies.map((b, i) => ({
     name: b.name || `body_${i}`,
     mass: parseFloat(b.mass),
@@ -49,6 +78,7 @@ async function handleSave() {
     radius: parseFloat(b.radius),
     color: b.color,
   }));
+
 
   const checkResponse = await fetch(`${API_URL}/simulations/check-duplicate`, {
     method: 'POST',
@@ -117,6 +147,6 @@ async function handleSave() {
     </div>
   </form>
 );
-}
+};
 
 export default CreateSystemForm;
