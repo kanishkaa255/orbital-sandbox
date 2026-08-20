@@ -1,5 +1,9 @@
 import { useEffect, useRef } from 'react';
 import { runChaosMap } from './physics';
+const CHAOS_RUNS = 25;
+const CHAOS_STEPS = 15000;
+const CHAOS_DT = 3600;
+const PERTURBATION = 0.003;
 
 function ChaosMap({ baseBodies, onClose }) {
     const canvasRef = useRef(null);
@@ -15,7 +19,7 @@ function ChaosMap({ baseBodies, onClose }) {
         ctx.fillStyle = 'rgb(11, 14, 20)'; 
         ctx.fillRect(0, 0, canvas.width, canvas.height); 
 
-        const runs = runChaosMap(structuredClone(baseBodies), 25, 15000, 3600, 0.15); 
+        const runs = runChaosMap(structuredClone(baseBodies), CHAOS_RUNS, CHAOS_STEPS, CHAOS_DT, PERTURBATION); 
         console.log('runs computed:', runs.length); 
         if (!runs || runs.length === 0) return; 
 
@@ -76,7 +80,7 @@ function ChaosMap({ baseBodies, onClose }) {
     return (
         <div className="chaos-overlay">
             <div className="chaos-header">
-                <h2>Chaos Map - 25 runs, ±0.0001% velocity variation</h2>
+                <h2>Chaos Map - {CHAOS_RUNS} runs, ±{(PERTURBATION * 50).toFixed(2)}% velocity variation</h2>
                 <button onClick={onClose}>Close</button>
             </div>
             <canvas ref={canvasRef} width={900} height={700} style={{ background: 'var(--bg)' }} />

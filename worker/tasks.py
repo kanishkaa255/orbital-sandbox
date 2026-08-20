@@ -9,14 +9,13 @@ import math
 
 from anthropic import Anthropic
 from dotenv import load_dotenv
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
 
+from api.db import SessionLocal
 from physics.engine import Body, step
 
-DATABASE_URL = "postgresql://orbital_user:orbital_pass@localhost:5432/orbital_db"
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(bind=engine)
+#DATABASE_URL = "postgresql://orbital_user:orbital_pass@localhost:5432/orbital_db"
+#engine = create_engine(DATABASE_URL)
+#SessionLocal = sessionmaker(bind=engine)
 
 load_dotenv()
 client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
