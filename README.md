@@ -10,7 +10,7 @@ A 2D N-body gravity simulator in the browser. Build custom planetary systems, wa
 - **Real-Time Evolution:** Watch systems evolve on an HTML canvas using client-side Verlet integration with smooth trails.
 - **Gallery Architecture:** Save custom systems to a global sidebar gallery and load any saved configuration directly back into the live interactive editor for modifications or replication.
 - **Duplicate Detection:** The application automatically runs coordinate checking and attribute verification checks before database insertion to prevent duplicate entries from flooding the layout.
-- **AI Narration:** Sends high-fidelity simulated trajectory data arrays (not just the starting states) to Claude, which synthesizes a plain-English structural description of how the bodies behave over time.
+- **AI Narration:** Runs the simulation server-side, then builds a per-body summary, initial vs. final distance from the system's center of mass, expressed as a growth ratio, and sends that summary to Claude, which synthesizes a plain-English description of how the system behaved.
 - **Chaos Map Visualizations:** Generates 25 parallel simulation tracks of the active layout with a minute random velocity variance (\(\pm 0.15\%\)). The engine calculates each track forward and superimposes all 25 paths on a translucent overlay using advanced alpha-blending—creating a stark, immediate visual demonstration of a chaotic strange attractor and sensitive dependence on initial conditions. Runs entirely in-browser. Note worth mentioning: (\(\pm 0.15\%\)) is exaggerated well beyond realistic chaos-theory scale for visual clarity in quick demos. Really, any sensitive dependence in this system emerges from pertubations many orders of magnitude
 
 ## Physics Implementation
@@ -111,7 +111,7 @@ pytest -v
 # Run Python code formatting and linting sweeps
 ruff check .
 ```
-The automated GitHub Actions CI pipeline (`.github/workflows/ci.yml`) triggers this sequence alongside an operational multi-container Docker build validation check on every Pull Request.
+The automated GitHub Actions CI pipeline (`.github/workflows/ci.yml`) runs on every pull request: Python dependency install, `ruff` linting, Alembic migrations, `pytest`, and a build check of the API Docker image
 
 ## What's Not in v1
 
@@ -130,5 +130,5 @@ Engineering the **Chaos Map overlay** was the most rewarding component of this p
 ### Architectural Tradeoffs & Challenges
 The defining architectural challenge was managing the **Dual-Engine Architecture**. Replicating the exact physics calculation loop across both Python (backend worker validation) and JavaScript (frontend animations) was a conscious sacrifice made to ensure responsive client interactions without constantly hitting server networks. The cost of this choice is an engine maintenance sync constraint: updates to the mathematical calculations or collision rules must be thoroughly ported to both source files simultaneously to ensure that real-time canvas paths do not drift from server-side prediction data.
 
-If building this system again from scratch, I would write the foundational physics core a single time using Rust or C, compiling the codebase down into a centralized WebAssembly (WASM) binary package. This would provide high-performance, native-speed processing cycles within the frontend canvas while permitting the exact same calculation package to be imported directly into the Python backend API—eliminating parity drift concerns entirely while securing a completely unified codebase.
+If building this system again from scratch, I would write the foundational physics core a single time using Rust or C, compiling the codebase down into a centralized WebAssembly (WASM) binary package. This would provide high-performance, native-speed processing cycles within the frontend canvas while permitting the exact same calculation package to be imported directly into the Python backend API,eliminating parity drift concerns entirely while securing a completely unified codebase.
 
