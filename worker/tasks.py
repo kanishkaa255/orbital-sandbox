@@ -14,9 +14,9 @@ from sqlalchemy.orm import sessionmaker
 
 from physics.engine import Body, step
 
-DATABASE_URL = "postgresql://orbital_user:orbital_pass@localhost:5432/orbital_db"
-engine = create_engine(DATABASE_URL)
-SessionLocal = sessionmaker(bind=engine)
+#DATABASE_URL = "postgresql://orbital_user:orbital_pass@localhost:5432/orbital_db"
+#engine = create_engine(DATABASE_URL)
+#SessionLocal = sessionmaker(bind=engine)
 
 load_dotenv()
 client = Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
