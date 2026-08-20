@@ -1,3 +1,6 @@
+const MIN_SOFTENING = 1e6;
+const RADIUS_SOFTENING = 2;
+
 function computeAcceleration(body, other) {
     const G = 6.674e-11;
 
@@ -5,7 +8,8 @@ function computeAcceleration(body, other) {
     const dy = other.y - body.y;
     
     const r_squared = dx**2 + dy**2;
-    const EPSILON_SQ = Math.max(1e9 * 1e9, (body.radius || 0) ** 2); 
+    const softeningLength = Math.max(MIN_SOFTENING, RADIUS_SOFTENING) * (body.radius || 0);
+    const EPSILON_SQ = softeningLength ** 2; 
     const r = Math.sqrt(r_squared + EPSILON_SQ);
 
     const f = (G * body.mass * other.mass) / (r_squared + EPSILON_SQ); 
