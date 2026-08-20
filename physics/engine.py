@@ -13,23 +13,24 @@ class Body:
     radius: float = 1.0
     color: str = "white"
 
+MIN_SOFTENING = 1e6
+RADIUS_SOFTENING = 2
+
 
 def compute_acceleration(body: Body, other: Body):
     """Acceleration on `body` due to `other body`, using F = G*m1*m2/r^2."""
     dx = other.x - body.x
     dy = other.y - body.y
     r_squared = dx**2 + dy**2
-    EPSILON_SQ = 5e9**2 
+    softening_length = max(MIN_SOFTENING, RADIUS_SOFTENING * body.radius)
+    EPSILON_SQ = softening_length ** 2
     r = (r_squared + EPSILON_SQ) ** 0.5 
 
-    # force magnitude
     f = G * body.mass * other.mass / (r_squared + EPSILON_SQ)
 
-    # break force into x and y components
     fx = f * (dx / r)
     fy = f * (dy / r)
 
-    # a = F / m
     ax = fx / body.mass
     ay = fy / body.mass
     return ax, ay
@@ -64,6 +65,7 @@ def step(bodies: list[Body], dt: float):
 
 
         # Update position using current velocity and acceleration
+        
     for body, (ax, ay) in zip(bodies, accelerations):
         body.x += body.vx * dt + 0.5 * ax * dt**2
         body.y += body.vy * dt + 0.5 * ay * dt**2
