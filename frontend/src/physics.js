@@ -8,7 +8,7 @@ function computeAcceleration(body, other) {
     const dy = other.y - body.y;
     
     const r_squared = dx**2 + dy**2;
-    const softeningLength = Math.max(MIN_SOFTENING, RADIUS_SOFTENING) * (body.radius || 0);
+    const softeningLength = Math.max(MIN_SOFTENING, RADIUS_SOFTENING * (body.radius || 0));
     const EPSILON_SQ = softeningLength ** 2; 
     const r = Math.sqrt(r_squared + EPSILON_SQ);
 
