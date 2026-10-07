@@ -41,7 +41,7 @@ def test_energy_conservation():
 
     initial_energy = total_energy(bodies)
 
-    for i in range(24 * 3665 * 2):  # simulate 2 years
+    for i in range(24 * 365 * 2):  # simulate 2 years
         step(bodies, dt)
 
     final_energy = total_energy(bodies)
@@ -49,6 +49,4 @@ def test_energy_conservation():
     rel_diff = abs(final_energy - initial_energy) / initial_energy #added for testing
     print(f"\nrelative energy drift: {rel_diff:.6e}")
 
-    assert final_energy == pytest.approx(initial_energy, rel=1e-3)
-    #Euler drift over 30 days: 1.6e-7 relative
-    #Verlet drift over 2 years: relative energy drift: -2.076236e-11 relative
+    assert final_energy == pytest.approx(initial_energy, rel=1e-9)
